@@ -6,7 +6,4 @@
         "--line-length",
         "120"
     ],
-    "editor.codeActionsOnSave": {
-        "source.organizeImports": true,
-    },
 }
