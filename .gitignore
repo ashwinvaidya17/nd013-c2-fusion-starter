@@ -1,0 +1,14 @@
+# dataset
+*.tfrecord
+
+# binaries
+results/
+
+# models
+pretrained/
+
+# vscode
+.vscode/
+
+#python
+__pycache__
