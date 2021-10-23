@@ -64,13 +64,11 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
             ## step 2 : loop over all detected objects
             for detection in detections:
                 ## step 3 : extract the four corners of the current detection
-                _label, x, y, _z, w, _h, l, yaw = detection
+                _label, x, y, _z, _h, w, l, yaw = detection
                 c1_d, c2_d, c3_d, c4_d = tools.compute_box_corners(x, y, w, l, yaw)
 
                 ## step 4 : computer the center distance between label and detection bounding-box in x, y, and z
                 det_obj = Polygon([c1_d, c2_d, c3_d, c4_d])
-
-                center_dist = label_obj.centroid.distance(det_obj.centroid)
 
                 ## step 5 : compute the intersection over union (IOU) between label and detection bounding-box
                 intersection = label_obj.intersection(det_obj)
@@ -80,12 +78,7 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
                 ## step 6 : if IOU exceeds min_iou threshold, store [iou,dist_x, dist_y, dist_z] in matches_lab_det and increase the TP count
                 if iou > min_iou:
                     matches_lab_det.append(
-                        [
-                            iou,
-                            np.abs(label_obj.centroid.x - det_obj.centroid.x),
-                            np.abs(label_obj.centroid.y - det_obj.centroid.y),
-                            np.abs(label.box.center_z - _z),
-                        ]
+                        [iou, label.box.center_x - x, label.box.center_y - y, label.box.center_z - _z,]
                     )
                     true_positives += 1
 
@@ -141,12 +134,16 @@ def compute_performance_stats(det_performance_all):
     print("student task ID_S4_EX3")
 
     ## step 1 : extract the total number of positives, true positives, false negatives and false positives
+    pos_negs = np.array(pos_negs)
+    tp = sum(pos_negs[:, 1])
+    fn = sum(pos_negs[:, 2])
+    fp = sum(pos_negs[:, 3])
 
     ## step 2 : compute precision
-    precision = 0.0
+    precision = tp / (tp + fp)
 
     ## step 3 : compute recall
-    recall = 0.0
+    recall = tp / (tp + fn)
 
     #######
     ####### ID_S4_EX3 END #######
