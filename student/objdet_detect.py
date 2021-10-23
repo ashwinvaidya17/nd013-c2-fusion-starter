@@ -66,7 +66,7 @@ def load_configs_model(model_name='darknet', configs=None):
         configs.model_path = os.path.join(parent_path, 'tools', 'objdet_models', 'resnet')
         configs.pretrained_filename = os.path.join(configs.model_path, 'pretrained', 'fpn_resnet_18_epoch_300.pth')
         configs.imagenet_pretrained = False
-        configs.arch = "fpn_resnet_18"
+        configs.arch = "fpn_resnet"
         configs.num_classes = 3
         configs.num_center_offset = 2
         configs.num_z = 1
@@ -82,7 +82,7 @@ def load_configs_model(model_name='darknet', configs=None):
         configs.head_conv = 64
         configs.K = 50
         configs.down_ratio = 4
-        configs.conf_thresh = 0.2
+        configs.conf_thresh = 0.5
         #######
         ####### ID_S3_EX1-3 END #######     
 
@@ -139,8 +139,7 @@ def create_model(configs):
         ####### ID_S3_EX1-4 START #######     
         #######
         print("student task ID_S3_EX1-4")
-        arch_parts = configs.arch.split('_')
-        num_layers = int(arch_parts[-1])
+        num_layers = 18
         model = fpn_resnet.get_pose_net(
             num_layers=num_layers,
             heads=configs.heads,
@@ -201,7 +200,7 @@ def detect_objects(input_bev_maps, model, configs):
             detections = decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'],
                                 outputs['dim'], K=configs.K)
             detections = detections.cpu().numpy().astype(np.float32)
-            detections = post_processing(detections, configs)
+            detections = post_processing(detections, configs)[0]
 
 
             #######
@@ -216,13 +215,22 @@ def detect_objects(input_bev_maps, model, configs):
     objects = [] 
 
     ## step 1 : check whether there are any detections
-
+    if detections is not None:
+        
         ## step 2 : loop over all detections
-        
+        for detection in detections.values():
             ## step 3 : perform the conversion using the limits for x, y and z set in the configs structure
-        
+            if len(detection) > 0:
+                _label, _x, _y, _z, _h, _w, _l, _yaw = detection[0]
+                x = _y *(configs.lim_x[1]- configs.lim_x[0])/configs.bev_height + configs.lim_x[0]
+                x = np.floor(x).astype(np.int)
+                y = _x*(configs.lim_y[1]- configs.lim_y[0])/configs.bev_width + configs.lim_y[0]
+                y = np.floor(y).astype(np.int)
+                w = _w*(configs.lim_y[1]- configs.lim_y[0])/configs.bev_width
+                l = _l*(configs.lim_x[1]- configs.lim_x[0])/configs.bev_height
+
             ## step 4 : append the current object to the 'objects' array
-        
+                objects.append([1, x, y, _z, _h, w, l, -_yaw])
     #######
     ####### ID_S3_EX2 START #######   
     
