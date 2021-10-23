@@ -84,7 +84,7 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
                             iou,
                             np.abs(label_obj.centroid.x - det_obj.centroid.x),
                             np.abs(label_obj.centroid.y - det_obj.centroid.y),
-                            0,
+                            np.abs(label.box.center_z - _z),
                         ]
                     )
                     true_positives += 1
