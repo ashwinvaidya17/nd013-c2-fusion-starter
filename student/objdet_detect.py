@@ -198,9 +198,10 @@ def detect_objects(input_bev_maps, model, configs):
             ####### ID_S3_EX1-5 START #######
             #######
             print("student task ID_S3_EX1-5")
+            detections = []
             outputs["hm_cen"] = _sigmoid(outputs["hm_cen"])
             outputs["cen_offset"] = _sigmoid(outputs["cen_offset"])
-            detections = decode(
+            _detections = decode(
                 outputs["hm_cen"],
                 outputs["cen_offset"],
                 outputs["direction"],
@@ -208,9 +209,11 @@ def detect_objects(input_bev_maps, model, configs):
                 outputs["dim"],
                 K=configs.K,
             )
-            detections = detections.cpu().numpy().astype(np.float32)
-            detections = post_processing(detections, configs)[0]
-            # TODO convert to list
+            _detections = _detections.cpu().numpy().astype(np.float32)
+            _detections = post_processing(_detections, configs)[0]
+            for detection in _detections.values():
+                if len(detection) > 0:
+                    detections.append(detection.squeeze(0))
 
             #######
             ####### ID_S3_EX1-5 END #######
