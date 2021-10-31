@@ -34,8 +34,8 @@ class Filter:
         # TODO Step 1: implement and return system matrix F
         ############
         F = np.eye(params.dim_state)
-        F[0, 2] = params.dt
-        F[1, 3] = params.dt
+        F[0, 3] = params.dt
+        F[1, 4] = params.dt
 
         return F
 
