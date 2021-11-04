@@ -36,6 +36,7 @@ class Filter:
         F = np.eye(params.dim_state)
         F[0, 3] = params.dt
         F[1, 4] = params.dt
+        F[2, 5] = params.dt
 
         return F
 
@@ -55,10 +56,10 @@ class Filter:
             [
                 [cubed, 0, 0, squared, 0, 0],
                 [0, cubed, 0, 0, squared, 0],
-                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, cubed, 0, squared],
                 [squared, 0, 0, linear, 0, 0],
                 [0, squared, 0, 0, linear, 0],
-                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, squared, 0, linear],
             ]
         )
 
@@ -99,7 +100,7 @@ class Filter:
         ############
         # TODO Step 1: calculate and return residual gamma
         ############
-        gamma = meas.z - meas.sensor.get_H(track.x) * track.x
+        gamma = meas.z - meas.sensor.get_hx(track.x)
 
         return gamma
 

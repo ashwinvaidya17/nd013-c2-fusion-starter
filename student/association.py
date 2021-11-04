@@ -108,7 +108,11 @@ class Association:
         # TODO Step 3: calculate and return Mahalanobis distance
         ############
 
-        dist = KF.gamma(track, meas).T * KF.S(track, meas, meas.sensor.get_H(track.x)) * KF.gamma(track, meas)
+        dist = (
+            KF.gamma(track, meas).T
+            * np.linalg.inv(KF.S(track, meas, meas.sensor.get_H(track.x)))
+            * KF.gamma(track, meas)
+        )
         return dist
 
         ############
